@@ -1,0 +1,11 @@
+{
+    "name": "Python CI",
+    "description": "Python CI workflow template.",
+    "iconName": "file-code",
+    "categories": [
+        "Python"
+    ],
+    "filePatterns": [
+        "*.py"
+    ]
+}
