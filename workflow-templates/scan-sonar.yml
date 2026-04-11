@@ -1,0 +1,67 @@
+name: Scan Sonar
+
+on:
+  workflow_call:
+    inputs:
+      project-key:
+        description: "SonarCloud project key (e.g. my_org_my_repo)"
+        required: true
+        type: string
+      organization:
+        description: "SonarCloud organization key"
+        required: true
+        type: string
+      sonar-host-url:
+        description: "SonarCloud host URL"
+        required: false
+        type: string
+        default: "https://sonarcloud.io"
+      java-version:
+        description: "Java version to set up (leave empty to skip Java setup)"
+        required: false
+        type: string
+        default: ""
+      extra-args:
+        description: "Additional arguments passed to the SonarCloud scanner"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      SONAR_TOKEN:
+        description: "SonarCloud authentication token"
+        required: true
+
+jobs:
+  sonar-scan:
+    name: SonarCloud Scan & Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        if: ${{ inputs.java-version != '' }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: temurin
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ inputs.project-key }}
+            -Dsonar.organization=${{ inputs.organization }}
+            ${{ inputs.extra-args }}
+
+      - name: SonarCloud Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
