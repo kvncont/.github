@@ -1,0 +1,9 @@
+{
+    "name": "SonarCloud Scan",
+    "description": "Reusable workflow to scan repositories with SonarCloud and validate the Quality Gate.",
+    "iconName": "file-code",
+    "categories": [
+        "Code Quality",
+        "Security"
+    ]
+}

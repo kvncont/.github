@@ -1,0 +1,61 @@
+name: SonarCloud Scan
+
+on:
+  workflow_call:
+    inputs:
+      project-key:
+        description: 'SonarCloud project key'
+        required: true
+        type: string
+      organization:
+        description: 'SonarCloud organization'
+        required: true
+        type: string
+      java-version:
+        description: 'Java version to set up (leave empty to skip Java setup)'
+        required: false
+        type: string
+        default: ''
+      project-base-dir:
+        description: 'Project base directory for SonarScanner'
+        required: false
+        type: string
+        default: '.'
+      extra-args:
+        description: 'Additional SonarScanner CLI arguments'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan & Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ inputs.java-version }}
+        if: inputs.java-version != ''
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: 'temurin'
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: ${{ inputs.project-base-dir }}
+          args: >-
+            -Dsonar.projectKey=${{ inputs.project-key }}
+            -Dsonar.organization=${{ inputs.organization }}
+            -Dsonar.qualitygate.wait=true
+            ${{ inputs.extra-args }}
