@@ -44,15 +44,15 @@ SonarCloud requiere:
 
 **Rationale**: Los inputs obligatorios hacen el contrato explícito y evitan fallos silenciosos por archivos de propiedades mal configurados.
 
-### Secret `SONAR_TOKEN` como secret heredado
+### Secret `SONAR_TOKEN` como secret declarado
 
-**Decisión**: Usar `secrets: inherit` para que el workflow heredado reciba el `SONAR_TOKEN` del repositorio consumidor, sin necesidad de mapearlo explícitamente.
+**Decisión**: Declarar `SONAR_TOKEN` como secret requerido en `on.workflow_call.secrets`, permitiendo al repositorio consumidor pasarlo explícitamente o usar `secrets: inherit` desde su side.
 
 **Alternativas consideradas**:
-- **Secret explícito con `secrets.SONAR_TOKEN`**: Requiere que el consumidor pase el secret explícitamente en cada llamada.
-- **`secrets: inherit`**: Más simple para el consumidor, el token solo necesita existir en el repo o la organización.
+- **Solo `secrets: inherit` en el job del caller**: El workflow no documenta qué secrets necesita, lo cual dificulta el descubrimiento y la validación.
+- **Secret declarado en `workflow_call.secrets`**: El contrato queda explícito; el caller puede usar `secrets: inherit` o mapearlo directamente, con plena flexibilidad.
 
-**Rationale**: Reduce la fricción de adopción; el consumidor solo necesita tener el secret configurado.
+**Rationale**: Declarar el secret explícitamente documenta el contrato del workflow y permite la validación de presencia, manteniendo la simplicidad para el consumidor.
 
 ## Risks / Trade-offs
 
