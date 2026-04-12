@@ -1,6 +1,6 @@
 ---
 
-## name: 📄 OpenSpec
+name: 📄 OpenSpec
 description: Agente de desarrollo guiado por especificaciones usando OpenSpec. Garantiza que el CLI esté instalado y el proyecto inicializado antes de ejecutar cualquier acción. El uso de los archivos de prompt generados por OpenSpec es obligatorio y no negociable.
 ---
 
