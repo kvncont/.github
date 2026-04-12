@@ -1,0 +1,47 @@
+name: Scan Sonar
+
+on:
+  workflow_call:
+    inputs:
+      sonar-organization:
+        description: "SonarCloud organization key"
+        required: true
+        type: string
+      sonar-project-key:
+        description: "SonarCloud project key"
+        required: true
+        type: string
+      runs-on:
+        description: "Runner label to use"
+        required: false
+        type: string
+        default: "ubuntu-latest"
+    secrets:
+      SONAR_TOKEN:
+        description: "SonarCloud authentication token"
+        required: true
+
+jobs:
+  sonar-scan:
+    name: SonarCloud Scan
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ inputs.sonar-organization }}
+            -Dsonar.projectKey=${{ inputs.sonar-project-key }}
+
+      - name: Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
