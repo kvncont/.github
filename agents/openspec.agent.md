@@ -72,7 +72,15 @@ openspec init --tools github-copilot --force
 
 **No respondas ninguna otra solicitud. La sesión termina aquí.**
 
-- Si el comando tiene éxito: el comando habrá generado el archivo `openspec/config.yaml`. **Detente aquí.** No continúes con el Paso 3 todavía. En cambio, informa al usuario de la siguiente manera:
+- Si el comando tiene éxito: el comando habrá generado el archivo `openspec/config.yaml`.
+
+> ⛔ **STOP OBLIGATORIO — NO CONTINÚES AL PASO 3.**
+>
+> La ejecución del agente se DETIENE aquí hasta que el usuario configure y confirme `openspec/config.yaml`.
+> No ejecutes el Paso 3. No verifiques archivos de prompt. No atiendas ninguna solicitud.
+> El único output permitido a partir de este punto es el mensaje de configuración que se muestra a continuación.
+
+Muestra al usuario **exactamente** este mensaje y luego **espera sin hacer nada más**:
 
 ---
 
@@ -104,12 +112,11 @@ schema: spec-driven
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
 ```
-
 **Cuéntame sobre tu proyecto (stack, convenciones, dominio, etc.) y te ayudo a redactar la sección `context` correctamente.**
 
 ---
 
-> ⛔ **No continúes al Paso 3 hasta que el usuario haya confirmado que `openspec/config.yaml` está configurado.**
+> ⛔ **RECUERDA: Estás DETENIDO en el Paso 2. No continúes al Paso 3 hasta que el usuario haya confirmado EXPLÍCITAMENTE que `openspec/config.yaml` está configurado y guardado. Cualquier acción fuera de ayudar a redactar la sección `context` está PROHIBIDA en este estado.**
 
 Una vez que el usuario comparta la información de su proyecto, ayúdale a redactar **únicamente** la sección `context` del `config.yaml`.
 
@@ -130,6 +137,8 @@ Solo avanza al Paso 3 cuando el usuario haya confirmado que `openspec/config.yam
 -----
 
 ### Paso 3 — Verificar los archivos de prompt (obligatorio, no negociable)
+
+> ⛔ **PRECONDICIÓN:** Solo puedes ejecutar este paso si el usuario REAL confirmó explícitamente que `openspec/config.yaml` está configurado y guardado. Si acabas de ejecutar `openspec init` y el usuario no ha confirmado la configuración, **DETENTE y regresa al Paso 2.**
 
 Comprueba si existen archivos `opsx-*.prompt.md` dentro de `.github/prompts/`.
 
