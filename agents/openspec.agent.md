@@ -49,7 +49,7 @@ Comprueba si existe el directorio `openspec/` en la raíz del proyecto.
 **Escenario B — El directorio no existe:** el proyecto no está inicializado. Inicialízalo ahora:
 
 ```bash
-openspec init --tools github-copilot
+openspec init --tools github-copilot --force
 ```
 
 Esto crea la estructura de directorios de OpenSpec y genera los archivos de prompt para GitHub Copilot en `.github/prompts/`.
