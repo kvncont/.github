@@ -1,0 +1,45 @@
+name: SonarCloud Code Scanning
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SETUP INSTRUCTIONS
+#
+# 1. Add SONAR_TOKEN as a repository secret:
+#    → Repository Settings › Secrets and variables › Actions › New repository secret
+#    → Name: SONAR_TOKEN
+#    → Value: obtain from https://sonarcloud.io/account/security
+#
+# 2. Replace YOUR_PROJECT_KEY below with your SonarCloud project key.
+#    → Find it at: https://sonarcloud.io → your project › Administration › General Settings
+#
+# 3. (Optional) Change scanner-type if needed:
+#    → 'auto'        - SonarCloud auto-detects the language (default, works for most projects)
+#    → 'python'      - Python projects
+#    → 'javascript'  - JavaScript / TypeScript projects
+#    → 'terraform'   - Terraform projects (also set extra-args: '-Dsonar.sources=.')
+#    → 'other'       - Use extra-args for any custom sonar properties
+#
+# 4. (Optional) The quality gate result is posted to the PR but does not block
+#    merges by default. To enforce the quality gate, add a required status check
+#    in your branch protection rules.
+#
+# 5. SonarCloud project must be pre-created in the SonarCloud UI before first run.
+# ──────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    uses: kvncont/.github/.github/workflows/reusable-sonarcloud.yml@main
+    with:
+      sonar-project-key: YOUR_PROJECT_KEY   # Replace with your SonarCloud project key
+      sonar-organization: kvncont
+      # scanner-type: auto                  # Uncomment and set to: auto, python, javascript, terraform, or other
+      # source-dir: .                       # Set to the directory containing your source code
+      # extra-args: ''                      # Add extra sonar-scanner arguments if needed
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

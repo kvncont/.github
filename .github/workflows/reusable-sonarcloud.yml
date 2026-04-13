@@ -1,0 +1,83 @@
+name: Reusable — SonarCloud Scan
+
+# This reusable workflow runs SonarCloud analysis for any language.
+# Callers must supply their SonarCloud project key, organization slug, and SONAR_TOKEN secret.
+# The scanner auto-detects the language by default (scanner-type: auto).
+# For Terraform repos, pass additional sonar properties via extra-args (e.g. -Dsonar.sources=.).
+
+on:
+  workflow_call:
+    inputs:
+      sonar-project-key:
+        description: 'SonarCloud project key (e.g. my-org_my-repo). Find it in your SonarCloud project settings.'
+        type: string
+        required: true
+      sonar-organization:
+        description: 'SonarCloud organization slug (e.g. kvncont). Must match your SonarCloud org key.'
+        type: string
+        required: true
+      # scanner-type controls how the SonarCloud scanner is invoked:
+      #   auto        — scanner auto-detects language (works for most projects)
+      #   python      — suitable for Python projects
+      #   javascript  — suitable for JavaScript / TypeScript projects
+      #   terraform   — pass extra-args to set -Dsonar.sources as needed
+      #   other       — use extra-args to supply any custom sonar properties
+      scanner-type:
+        description: 'Scanner mode. One of: auto, python, javascript, terraform, other. Defaults to auto.'
+        type: string
+        required: false
+        default: 'auto'
+      source-dir:
+        description: 'Base directory for the SonarCloud scan (projectBaseDir). Defaults to the repository root.'
+        type: string
+        required: false
+        default: '.'
+      extra-args:
+        description: 'Additional sonar-scanner arguments passed verbatim to the action (e.g. -Dsonar.exclusions=**/vendor/**).'
+        type: string
+        required: false
+        default: ''
+      java-version:
+        description: 'JDK version to install for the SonarCloud scanner. Defaults to 17.'
+        type: string
+        required: false
+        default: '17'
+    secrets:
+      SONAR_TOKEN:
+        description: 'SonarCloud authentication token. Store as a repository or organisation secret named SONAR_TOKEN.'
+        required: true
+
+jobs:
+  sonarcloud-scan:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    permissions: read-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Shallow clones disable blame information. fetch-depth: 0 fetches full history
+          # so SonarCloud can display accurate blame and new-code period data.
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: temurin
+
+      - name: Run SonarCloud scan
+        # SonarSource/sonarcloud-github-action handles authentication, PR decoration,
+        # and quality gate status automatically.
+        # scanner-type input is informational; callers can use extra-args for language-specific properties.
+        uses: SonarSource/sonarcloud-github-action@v5.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: ${{ inputs.source-dir }}
+          args: >-
+            -Dsonar.projectKey=${{ inputs.sonar-project-key }}
+            -Dsonar.organization=${{ inputs.sonar-organization }}
+            ${{ inputs.extra-args }}

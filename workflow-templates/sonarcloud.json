@@ -1,0 +1,6 @@
+{
+  "name": "SonarCloud Scan",
+  "description": "Scan your code with SonarCloud for quality and security issues.",
+  "iconName": "shield-check",
+  "categories": ["Python", "JavaScript", "Terraform", "Security"]
+}
