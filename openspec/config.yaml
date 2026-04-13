@@ -1,0 +1,25 @@
+schema: spec-driven
+
+context: |
+  This is the kvncont/.github repository — the organization-level GitHub repository.
+  It contains reusable GitHub Actions workflows and workflow templates for use across all repositories in the kvncont organization.
+
+  Tech stack and domain:
+  - GitHub Actions (YAML): reusable workflows, workflow templates, composite actions
+  - The organization runs projects in multiple languages: Python, JavaScript/TypeScript, Terraform (IaC)
+  - SonarCloud is the code quality and security scanning platform used across all projects
+  - Workflows must follow GitHub Actions best practices: pinned action versions, least-privilege permissions, clear job naming
+
+  Conventions:
+  - Reusable workflows go in `.github/workflows/` with the prefix `reusable-` (e.g., `reusable-sonarcloud.yml`)
+  - Workflow templates (caller stubs) go in `workflow-templates/`
+  - Use `workflow_call` trigger for reusable workflows
+  - Inputs and secrets must be explicitly declared with descriptions and types
+  - Pin all third-party actions to a specific SHA or version tag
+  - Use `GITHUB_TOKEN` where possible; only require additional secrets when strictly necessary
+  - Keep jobs focused and single-responsibility
+
+  Style guide:
+  - YAML: 2-space indentation, kebab-case for job and step names
+  - Add comments to explain non-obvious configuration
+  - Group related inputs/secrets together with comments
