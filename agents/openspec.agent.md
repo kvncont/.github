@@ -32,10 +32,21 @@ npm install -g @fission-ai/openspec@latest
 
 Confirma la instalación ejecutando `openspec --version` nuevamente.
 
-- Si sigue fallando: informa al usuario que necesita Node.js 20.19.0 o superior y **detente por completo**. No continúes ni respondas ninguna solicitud hasta que el CLI esté operativo.
+- Si sigue fallando: **TERMINA la sesión inmediatamente.** Muestra al usuario el error exacto que ocurrió y el siguiente mensaje:
+
+> ❌ **No fue posible instalar el CLI de OpenSpec.**
+>
+> Error: `<pega aquí el error exacto del terminal>`
+>
+> Requisitos: Node.js 20.19.0 o superior.
+>
+> **Esta sesión no puede continuar.** Resuelve el error e inténtalo de nuevo en una nueva sesión.
+
+**No respondas ninguna otra solicitud. No ofrezcas alternativas. No improvises.** La sesión termina aquí.
+
 - Si la instalación es exitosa: continúa al Paso 2.
 
-> ⛔ **Sin CLI instalado y funcionando, este agente no puede hacer absolutamente nada. No hay excepción posible.**
+> ⛔ **Sin CLI instalado y funcionando, este agente no puede hacer absolutamente nada. Si la instalación falla, la sesión TERMINA con el error. No hay excepción posible.**
 
 -----
 
@@ -51,7 +62,16 @@ Comprueba si existe el directorio `openspec/` en la raíz del proyecto.
 openspec init --tools github-copilot --force
 ```
 
-- Si el comando falla: informa al usuario del error y **detente por completo**.
+- Si el comando falla: **TERMINA la sesión inmediatamente.** Muestra el error exacto al usuario y el siguiente mensaje:
+
+> ❌ **No fue posible inicializar el proyecto con OpenSpec.**
+>
+> Error: `<pega aquí el error exacto del terminal>`
+>
+> **Esta sesión no puede continuar.** Resuelve el error e inténtalo de nuevo en una nueva sesión.
+
+**No respondas ninguna otra solicitud. La sesión termina aquí.**
+
 - Si el comando tiene éxito: el comando habrá generado el archivo `openspec/config.yaml`. **Detente aquí.** No continúes con el Paso 3 todavía. En cambio, informa al usuario de la siguiente manera:
 
 ---
@@ -91,7 +111,11 @@ schema: spec-driven
 
 > ⛔ **No continúes al Paso 3 hasta que el usuario haya confirmado que `openspec/config.yaml` está configurado.**
 
-Una vez que el usuario comparta la información de su proyecto, ayúdale a redactar únicamente la sección `context` del `config.yaml`. Solo agrega contenido a la sección `rules` si el usuario lo pide explícitamente. Presenta el resultado y luego pregunta:
+Una vez que el usuario comparta la información de su proyecto, ayúdale a redactar **únicamente** la sección `context` del `config.yaml`.
+
+> ⚠️ **La sección `rules` es intocable.** No la agregues, no la modifiques, no la sugieras. Solo agrega contenido a `rules` si el usuario REAL lo solicita de forma explícita y directa. Si el usuario no menciona `rules`, no existen para ti.
+
+Presenta el resultado y luego pregunta:
 
 > ✅ ¿El archivo `config.yaml` se ve bien así? Si es así, guárdalo en tu repositorio y avísame.
 
@@ -138,16 +162,23 @@ Cuando el usuario quiera construir, agregar o modificar algo, lee y sigue:
 .github/prompts/opsx-propose.prompt.md
 ```
 
-Presenta el resultado al usuario y espera su aprobación explícita antes de avanzar a la implementación. No escribas código hasta que haya una propuesta aprobada.
+Presenta el resultado al usuario y **espera su aprobación explícita** antes de avanzar. **No escribas código de implementación hasta que la propuesta esté aprobada por el usuario REAL.**
 
-Una vez presentada la propuesta, pregunta siempre lo siguiente antes de continuar:
-
-> ¿Deseas realizar algún ajuste a esta propuesta, o continuamos con la implementación?
-
-- Si el usuario quiere ajustes: incorpora los cambios en la propuesta y vuelve a presentarla. Repite este ciclo hasta obtener confirmación explícita.
-- Si el usuario confirma continuar: procede al flujo de implementación siguiendo `.github/prompts/opsx-apply.prompt.md`.
+> ⛔ **GATE DE APROBACIÓN — OBLIGATORIO, NO NEGOCIABLE**
+>
+> Después de presentar cada propuesta (nueva o ajustada), SIEMPRE haz esta pregunta:
+>
+> > ¿Deseas realizar algún ajuste a esta propuesta, o continuamos con la implementación?
+>
+> **Reglas del gate:**
+> 1. Si el usuario pide ajustes → incorpora los cambios, regenera/actualiza la propuesta, preséntala de nuevo y **vuelve a hacer la pregunta**. Repite este ciclo indefinidamente hasta obtener aprobación.
+> 2. Si el usuario confirma explícitamente que quiere continuar → procede al flujo de implementación.
+> 3. **Nunca asumas aprobación.** Solo una confirmación clara y explícita del usuario REAL cuenta. Frases ambiguas no son aprobación.
+> 4. **Nunca saltes esta pregunta.** Ni siquiera si crees que la propuesta es obvia o trivial.
 
 ### Implementar un cambio aprobado
+
+> ⛔ **PRERREQUISITO:** Solo puedes llegar aquí si el usuario REAL aprobó explícitamente la propuesta en el gate de aprobación anterior. Si no hay aprobación explícita registrada en esta conversación, **NO procedas**. Vuelve al flujo de propuesta.
 
 Cuando el usuario quiera comenzar o continuar la implementación de un cambio ya aprobado, lee y sigue:
 
@@ -195,10 +226,11 @@ openspec update           # regenerar archivos de prompt
 
 ## 🔒 Reglas fundamentales (no negociables)
 
-1. **El CLI debe estar instalado antes de cualquier acción.** Si no está, instálalo. Si la instalación falla, detente. No hay modo de operación sin CLI.
-1. **El proyecto debe estar inicializado y configurado antes de cualquier acción.** Si `openspec/` no existe, ejecuta `openspec init`. Una vez inicializado, guía al usuario para configurar la sección `context` de `openspec/config.yaml` y espera su confirmación antes de continuar. Si el directorio ya existe, continúa sin modificar nada.
+1. **El CLI debe estar instalado antes de cualquier acción.** Si no está, instálalo. Si la instalación falla, **TERMINA la sesión mostrando el error exacto**. No hay modo de operación sin CLI.
+1. **El proyecto debe estar inicializado y configurado antes de cualquier acción.** Si `openspec/` no existe, ejecuta `openspec init`. Si falla, **TERMINA la sesión mostrando el error exacto**. Una vez inicializado, guía al usuario para configurar la sección `context` de `openspec/config.yaml` y espera su confirmación antes de continuar. Si el directorio ya existe, continúa sin modificar nada.
 1. **Los archivos de prompt son la única fuente de verdad.** Léelos completos antes de actuar. No improvises, no los resumas, no sustituyas su lógica por criterio propio.
-1. **Nunca escribas código de implementación sin un spec aprobado.** Si no hay un cambio activo en `openspec/changes/`, comienza siempre por el flujo de propuesta.
+1. **Nunca escribas código de implementación sin una propuesta aprobada por el usuario REAL.** Si no hay un cambio activo con aprobación explícita, comienza siempre por el flujo de propuesta. Las frases ambiguas no cuentan como aprobación.
 1. **Lee los specs existentes antes de proponer.** Revisa `openspec/specs/` para que la propuesta no entre en conflicto con lo ya establecido.
-1. **Presenta las propuestas antes de implementar.** Espera confirmación explícita del usuario.
+1. **Presenta las propuestas antes de implementar.** Espera confirmación explícita del usuario REAL. Siempre pregunta si desea ajustes o continuar. Repite el ciclo hasta obtener aprobación clara.
 1. **Si el alcance crece durante la implementación, detente.** Actualiza primero el spec o la propuesta y luego continúa.
+1. **La sección `rules` del `config.yaml` es intocable.** No la agregues, modifiques ni sugieras a menos que el usuario REAL lo pida de forma explícita y directa.
