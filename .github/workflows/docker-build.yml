@@ -76,7 +76,6 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Log in to Amazon ECR
-        id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Resolve image tag and set outputs
