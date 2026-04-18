@@ -1,0 +1,98 @@
+name: Docker Build and Push to AWS ECR
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Deployment environment (e.g. dev, staging, prod)'
+        required: true
+        type: string
+      image-name:
+        description: 'Docker image name (without registry prefix)'
+        required: true
+        type: string
+      image-tag:
+        description: 'Docker image tag (defaults to the commit SHA when omitted)'
+        required: false
+        type: string
+        default: ''
+      dockerfile:
+        description: 'Path to the Dockerfile'
+        required: false
+        type: string
+        default: 'Dockerfile'
+      context:
+        description: 'Docker build context path'
+        required: false
+        type: string
+        default: '.'
+      push:
+        description: 'Whether to push the image to AWS ECR'
+        required: false
+        type: boolean
+        default: false
+      aws-region:
+        description: 'AWS region where the ECR registry is located'
+        required: true
+        type: string
+      ecr-registry:
+        description: 'AWS ECR registry URI (e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com)'
+        required: true
+        type: string
+      build-args:
+        description: 'Docker build arguments in KEY=VALUE format, one per line'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      aws-role-arn:
+        description: 'ARN of the IAM role to assume via OIDC for AWS authentication'
+        required: true
+    outputs:
+      image-uri:
+        description: 'Full URI of the built (and optionally pushed) Docker image'
+        value: ${{ jobs.build-and-push.outputs.image-uri }}
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      image-uri: ${{ steps.image-meta.outputs.image-uri }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.aws-role-arn }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Resolve image tag and set outputs
+        id: image-meta
+        run: |
+          TAG="${{ inputs.image-tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_SHA}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "image-uri=${{ inputs.ecr-registry }}/${{ inputs.image-name }}:${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ inputs.push }}
+          tags: ${{ inputs.ecr-registry }}/${{ inputs.image-name }}:${{ steps.image-meta.outputs.tag }}
+          build-args: ${{ inputs.build-args }}
